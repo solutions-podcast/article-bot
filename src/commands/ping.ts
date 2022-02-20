@@ -4,8 +4,8 @@ export default {
 	category: 'Testing',
 	description: 'Replies with pong',
 	slash: true,
-	testOnly: true,
+	// testOnly: true,
 	callback: ({ message, interaction }) => {
-    return 'Pong';
+		return 'Pong';
 	},
 } as ICommand;

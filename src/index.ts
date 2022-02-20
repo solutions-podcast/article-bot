@@ -13,10 +13,10 @@ client.on('ready', () => {
 
 	new WOKCommands(client, {
 		commandsDir: path.join(__dirname, 'commands'),
-		typeScript: true,
-		testServers: process.env.DISCORD_TEST_SERVERS?.split(',') ?? [],
+		typeScript: process.env.NODE_ENV !== 'production',
+		// testServers: process.env.DISCORD_TEST_SERVERS?.split(',') ?? [],
+		mongoUri: process.env.MONGO_URI,
 	});
 });
 
-// console.log(process.env.DISCORD_TEST_SERVERS);
 client.login(process.env.DISCORD_BOT_TOKEN);

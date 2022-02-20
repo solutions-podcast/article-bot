@@ -2,9 +2,10 @@
 	"name": "article-bot",
 	"version": "1.0.0",
 	"description": "Bot for posting and voting on articles",
-	"main": "index.js",
 	"scripts": {
 		"dev": "nodemon src/index.ts",
+		"build": "tsc",
+		"start": "node dist/index.js",
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
@@ -24,6 +25,7 @@
 		"wokcommands": "^1.5.3"
 	},
 	"devDependencies": {
+		"@types/node": "^17.0.18",
 		"nodemon": "^2.0.15",
 		"ts-node": "^10.5.0",
 		"typescript": "^4.5.5"
