@@ -6,7 +6,7 @@ const schema = new Schema({
 	publisher: String,
 	url: String,
 	submitter: String,
-	votes: Number,
+	votes: [String],
 	submissionMessageId: String,
 	articleBotMessageId: String,
 });

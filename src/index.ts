@@ -2,6 +2,7 @@ import DiscordJS, { Intents } from 'discord.js';
 import WOKCommands from 'wokcommands';
 import path from 'path';
 import dotenv from 'dotenv';
+import { setupCollectors } from './setup-collectors';
 dotenv.config();
 
 const client = new DiscordJS.Client({
@@ -18,6 +19,7 @@ client.on('ready', () => {
 		// testServers: process.env.DISCORD_TEST_SERVERS?.split(',') ?? [],
 		mongoUri: process.env.MONGO_URI,
 	});
+	setupCollectors(client);
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
