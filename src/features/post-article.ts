@@ -11,7 +11,7 @@ import WOKCommands from 'wokcommands';
 import { isWebUri } from 'valid-url';
 import { ArticleData, extract } from 'article-parser';
 import { articleParserMockResponse } from '../test-data/article-parser';
-import ArticlePostsSchema from '../models/article-posts';
+import ArticlePostsSchema, { ArticlePost } from '../models/article-posts';
 import { createArticleEmbeds } from '../helpers/article-formatting';
 
 const articleBotChannelName = process.env.NODE_ENV === 'production' ? 'article-bot' : 'article-bot-test';
@@ -36,30 +36,42 @@ export default (client: Client, instance: WOKCommands) => {
 			return;
 		}
 
-		const article = await extract(urlFromPost);
+		const { url, title, description, links, image, author, source, published, ttr, content } = await extract(
+			urlFromPost
+		);
 
 		// Uncomment to use test data:
-		// const article = articleParserMockResponse;
+		// const { url, title, description, links, image, author, source, published, ttr, content } = articleParserMockResponse;
+
+		if (!title || !url) {
+			throw new Error('Invalid article data');
+		}
+
+		const article: ArticlePost = {
+			title,
+			description,
+			image,
+			content,
+			readingTimeSeconds: ttr,
+			authors: author ? [author] : [],
+			publisher: 'Publisher name',
+			url,
+			submitter: message.author.id,
+			votes: [],
+			submissionMessageId: message.id,
+		};
 
 		const buttons = new MessageActionRow().addComponents(
-			new MessageButton().setCustomId('article-vote').setLabel('Vote').setStyle('SUCCESS')
+			new MessageButton().setCustomId('article-vote').setLabel('Toggle Vote').setStyle('SUCCESS')
 		);
 
 		const articleBotMessage = await channel.send({
 			components: [buttons],
 			embeds: await createArticleEmbeds(article, []),
 		});
+		article.articleBotMessageId = articleBotMessage.id;
 
-		ArticlePostsSchema.create({
-			title: article.title,
-			authors: article.author,
-			// publisher: '',
-			url: article.url,
-			submitter: message.author.id,
-			votes: [],
-			submissionMessageId: message.id,
-			articleBotMessageId: articleBotMessage.id,
-		});
+		ArticlePostsSchema.create(article);
 	});
 };
 

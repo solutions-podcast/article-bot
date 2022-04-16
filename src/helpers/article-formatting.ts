@@ -1,16 +1,18 @@
-import { ArticleData } from 'article-parser';
 import { Client, MessageEmbedOptions } from 'discord.js';
+import { ArticlePost } from '../models/article-posts';
 
 export const createArticleEmbeds = async (
-	article: ArticleData,
+	article: ArticlePost,
 	votes?: Array<string>,
 	client?: Client
 ): Promise<Array<MessageEmbedOptions>> => {
-	const { url, title, description, links, image, author, source, published, ttr, content } = article;
+	// links, source, published, content
+	const { url, title, description, image, authors, readingTimeSeconds } = article;
 	if (!title || !url) {
 		throw new Error('Invalid article data');
 	}
-	let voteUsers: Array<unknown> = ['none']; // TODO: Figure out why this can't be Array<string>
+	let voteUsers: Array<unknown> = ['(none)']; // TODO: Figure out why this can't be Array<string>
+
 	if (votes && client) {
 		voteUsers = await Promise.all(
 			votes.map((id) => {
@@ -23,9 +25,11 @@ export const createArticleEmbeds = async (
 			})
 		);
 		if (voteUsers.length === 0) {
-			voteUsers = ['none'];
+			voteUsers = ['(none)'];
 		}
 	}
+
+	const voteAmount = voteUsers[0] === '(none)' ? 0 : voteUsers.length;
 
 	return [
 		{
@@ -43,14 +47,14 @@ export const createArticleEmbeds = async (
 			fields: [
 				{
 					name: 'Author(s)',
-					value: author ?? 'Unknown',
+					value: authors.join(', ') ?? 'Unknown',
 				},
 				{
 					name: 'Reading time',
-					value: ttr ? `${Math.floor(ttr / 60)} minutes` : 'Unknown',
+					value: readingTimeSeconds ? `${Math.floor(readingTimeSeconds / 60)} minutes` : 'Unknown',
 				},
 				{
-					name: 'Votes',
+					name: `Votes (${voteAmount})`,
 					value: voteUsers.join('\n'),
 				},
 			],

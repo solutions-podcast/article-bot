@@ -9,35 +9,27 @@ const voteCollectorInit = (channel: TextChannel, client: Client) => {
 		if (i.customId !== 'article-vote') {
 			return;
 		}
-		console.log(i);
-		// i.reply({
-		// 	content:z 'You clicked a button...',
-		// });
 		try {
 			const article = await ArticlePostsSchema.findOne({ articleBotMessageId: i.message.id });
 			if (article && article.votes) {
-				if (article.votes.includes(i.user.id)) {
-					await ArticlePostsSchema.findOneAndUpdate(
-						{
-							articleBotMessageId: i.message.id,
-						},
-						{
+				const updatePayload = article.votes.includes(i.user.id)
+					? {
 							$pull: { votes: i.user.id },
-						}
-					);
-				} else {
-					await ArticlePostsSchema.findOneAndUpdate(
-						{
-							articleBotMessageId: i.message.id,
-						},
-						{
+					  }
+					: {
 							$addToSet: { votes: i.user.id },
-						}
-					);
-				}
-				i.update({ embeds: await createArticleEmbeds(article, article.votes, client) });
+					  };
+
+				await ArticlePostsSchema.findOneAndUpdate(
+					{
+						articleBotMessageId: i.message.id,
+					},
+					updatePayload
+				);
+
+				const updatedArticle = await ArticlePostsSchema.findOne({ articleBotMessageId: i.message.id });
+				i.update({ embeds: await createArticleEmbeds(article, updatedArticle.votes, client) });
 			}
-			console.log(article.votes);
 		} catch (error) {
 			console.error('Could not find post in db');
 		}
