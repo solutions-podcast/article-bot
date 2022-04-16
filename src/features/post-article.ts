@@ -1,9 +1,18 @@
-import { ButtonInteraction, Client, MessageActionRow, MessageButton, TextChannel } from 'discord.js';
+import {
+	ButtonInteraction,
+	Client,
+	MessageActionRow,
+	MessageButton,
+	MessageEmbed,
+	MessageEmbedOptions,
+	TextChannel,
+} from 'discord.js';
 import WOKCommands from 'wokcommands';
 import { isWebUri } from 'valid-url';
-import { extract } from 'article-parser';
+import { ArticleData, extract } from 'article-parser';
 import { articleParserMockResponse } from '../test-data/article-parser';
 import ArticlePostsSchema from '../models/article-posts';
+import { createArticleEmbeds } from '../helpers/article-formatting';
 
 const articleBotChannelName = process.env.NODE_ENV === 'production' ? 'article-bot' : 'article-bot-test';
 
@@ -27,12 +36,10 @@ export default (client: Client, instance: WOKCommands) => {
 			return;
 		}
 
-		const { url, title, description, links, image, author, source, published, ttr, content } = await extract(
-			urlFromPost
-		);
+		const article = await extract(urlFromPost);
 
 		// Uncomment to use test data:
-		// const { url, title, description, links, image, author, source, published, ttr, content } = articleParserMockResponse;
+		// const article = articleParserMockResponse;
 
 		const buttons = new MessageActionRow().addComponents(
 			new MessageButton().setCustomId('article-vote').setLabel('Vote').setStyle('SUCCESS')
@@ -40,41 +47,14 @@ export default (client: Client, instance: WOKCommands) => {
 
 		const articleBotMessage = await channel.send({
 			components: [buttons],
-			embeds: [
-				{
-					color: '#ffaa00',
-					title,
-					url,
-					description,
-					timestamp: new Date(),
-					author: {
-						name: 'Publisher Name',
-					},
-					image: {
-						url: image,
-					},
-					fields: [
-						{
-							name: 'Authors',
-							value: author ?? 'Unknown',
-						},
-						{
-							name: 'Reading time',
-							value: ttr ? `${Math.floor(ttr / 60)} minutes` : 'Unknown',
-						},
-					],
-					// footer: {
-					//   text:
-					// }
-				},
-			],
+			embeds: await createArticleEmbeds(article, []),
 		});
 
 		ArticlePostsSchema.create({
-			title,
-			authors: author,
+			title: article.title,
+			authors: article.author,
 			// publisher: '',
-			url,
+			url: article.url,
 			submitter: message.author.id,
 			votes: [],
 			submissionMessageId: message.id,

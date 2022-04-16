@@ -1,35 +1,43 @@
-import DiscordJS, { ButtonInteraction, TextChannel } from 'discord.js';
+import DiscordJS, { ButtonInteraction, Client, TextChannel } from 'discord.js';
+import { createArticleEmbeds } from './helpers/article-formatting';
 import ArticlePostsSchema from './models/article-posts';
 
-const voteCollectorInit = (channel: TextChannel) => {
+const voteCollectorInit = (channel: TextChannel, client: Client) => {
 	const voteCollector = channel.createMessageComponentCollector({});
 
 	voteCollector.on('collect', async (i: ButtonInteraction) => {
-		console.log('collect');
-		i.reply({
-			content: 'You clicked a button...',
-		});
+		if (i.customId !== 'article-vote') {
+			return;
+		}
+		console.log(i);
+		// i.reply({
+		// 	content:z 'You clicked a button...',
+		// });
 		try {
-			await ArticlePostsSchema.findOneAndUpdate(
-				{
-					articleBotMessageId: i.message.id,
-				},
-				{
-					$addToSet: { votes: i.user.id },
+			const article = await ArticlePostsSchema.findOne({ articleBotMessageId: i.message.id });
+			if (article && article.votes) {
+				if (article.votes.includes(i.user.id)) {
+					await ArticlePostsSchema.findOneAndUpdate(
+						{
+							articleBotMessageId: i.message.id,
+						},
+						{
+							$pull: { votes: i.user.id },
+						}
+					);
+				} else {
+					await ArticlePostsSchema.findOneAndUpdate(
+						{
+							articleBotMessageId: i.message.id,
+						},
+						{
+							$addToSet: { votes: i.user.id },
+						}
+					);
 				}
-			);
-			const unvoteCollector = channel.createMessageComponentCollector({});
-
-			unvoteCollector.on('collect', async (i: ButtonInteraction) => {
-				await ArticlePostsSchema.findOneAndUpdate(
-					{
-						articleBotMessageId: i.message.id,
-					},
-					{
-						$pull: { votes: i.user.id },
-					}
-				);
-			});
+				i.update({ embeds: await createArticleEmbeds(article, article.votes, client) });
+			}
+			console.log(article.votes);
 		} catch (error) {
 			console.error('Could not find post in db');
 		}
@@ -40,6 +48,9 @@ const collectors = [
 	{
 		channelName: process.env.NODE_ENV === 'production' ? 'article-bot' : 'article-bot-test',
 		init: voteCollectorInit,
+		buttons: {
+			// vote
+		},
 	},
 ];
 
@@ -47,7 +58,7 @@ export function setupCollectors(client: DiscordJS.Client) {
 	client.guilds.cache.forEach((guild) => {
 		collectors.forEach(({ channelName, init }) => {
 			const channel = guild.channels.cache.find((channel) => channel.name === channelName) as TextChannel;
-			init(channel);
+			init(channel, client);
 		});
 	});
 }
