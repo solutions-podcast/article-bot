@@ -1,7 +1,7 @@
 FROM node:lts as build
 WORKDIR /usr/src/app
 COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
-RUN yarn --frozen-lockfiley && mv node_modules ../
+RUN yarn --frozen-lockfile && mv node_modules ../
 COPY . .
 RUN chown -R node /usr/src/app
 USER node
