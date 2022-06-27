@@ -13,6 +13,9 @@ import { ArticleData, extract } from 'article-parser';
 import { articleParserMockResponse } from '../test-data/article-parser';
 import ArticlePostsSchema, { ArticlePost } from '../models/article-posts';
 import { createArticleEmbeds } from '../helpers/article-formatting';
+import { getByUrl } from 'mbfc-node';
+import { readFile } from 'fs/promises';
+import path from 'path';
 
 const articleBotChannelName = process.env.NODE_ENV === 'production' ? 'article-bot' : 'article-bot-test';
 
@@ -40,6 +43,10 @@ export default (client: Client, instance: WOKCommands) => {
 			urlFromPost
 		);
 
+		const mbfcData = JSON.parse((await readFile(path.join('cache', 'mbfc-data.json'))).toString());
+
+		const mbfcResult = getByUrl(urlFromPost, mbfcData);
+
 		// Uncomment to use test data:
 		// const { url, title, description, links, image, author, source, published, ttr, content } = articleParserMockResponse;
 
@@ -59,6 +66,7 @@ export default (client: Client, instance: WOKCommands) => {
 			submitter: message.author.id,
 			votes: [],
 			submissionMessageId: message.id,
+			mbfcResult: mbfcResult,
 		};
 
 		const buttons = new MessageActionRow().addComponents(

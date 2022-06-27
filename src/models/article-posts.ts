@@ -1,3 +1,4 @@
+import { Result } from 'mbfc-node/dist/interfaces';
 import mongoose, { Schema } from 'mongoose';
 
 export interface ArticlePost {
@@ -11,8 +12,10 @@ export interface ArticlePost {
 	url: string;
 	submitter: string;
 	votes: Array<string>;
+	discussion?: number;
 	submissionMessageId: string;
 	articleBotMessageId?: string;
+	mbfcResult?: Result;
 }
 
 const schema = new Schema<ArticlePost>({
@@ -26,8 +29,10 @@ const schema = new Schema<ArticlePost>({
 	url: String,
 	submitter: String,
 	votes: [String],
+	discussion: Number,
 	submissionMessageId: String,
 	articleBotMessageId: String,
+	mbfcResult: Schema.Types.Mixed,
 });
 
 const name = 'article-posts';

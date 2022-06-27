@@ -31,7 +31,7 @@ export const createArticleEmbeds = async (
 
 	const voteAmount = voteUsers[0] === '(none)' ? 0 : voteUsers.length;
 
-	return [
+	const embeds: Array<MessageEmbedOptions> = [
 		{
 			color: '#ffaa00',
 			title,
@@ -48,14 +48,17 @@ export const createArticleEmbeds = async (
 				{
 					name: 'Author(s)',
 					value: authors.join(', ') ?? 'Unknown',
+					inline: true,
 				},
 				{
 					name: 'Reading time',
 					value: readingTimeSeconds ? `${Math.floor(readingTimeSeconds / 60)} minutes` : 'Unknown',
+					inline: true,
 				},
 				{
 					name: `Votes (${voteAmount})`,
 					value: voteUsers.join('\n'),
+					inline: true,
 				},
 			],
 			// footer: {
@@ -63,4 +66,40 @@ export const createArticleEmbeds = async (
 			// }
 		},
 	];
+
+	if (embeds[0].fields !== undefined && article.mbfcResult) {
+		const { bias, credibility, factualReporting, name, url } = article.mbfcResult;
+		embeds[0].fields.push(
+			...[
+				{
+					name: 'Publisher',
+					value: name,
+					inline: true,
+				},
+				{ name: '\u200B', value: '\u200B' },
+				{
+					name: 'Publisher Bias',
+					value: bias,
+					inline: true,
+				},
+				{
+					name: 'Publisher Credibility',
+					value: credibility,
+					inline: true,
+				},
+				{
+					name: 'Publisher Factual Reporting',
+					value: factualReporting,
+					inline: true,
+				},
+				{
+					name: 'Publisher Media Bias Fact Check',
+					value: url,
+					inline: true,
+				},
+			]
+		);
+	}
+
+	return embeds;
 };
