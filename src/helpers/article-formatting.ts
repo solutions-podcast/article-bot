@@ -39,7 +39,7 @@ export const createArticleEmbeds = async (
 			description,
 			timestamp: Date.now(),
 			author: {
-				name: 'Publisher Name',
+				name: url.split('/')[2],
 			},
 			image: {
 				url: image,
@@ -47,7 +47,7 @@ export const createArticleEmbeds = async (
 			fields: [
 				{
 					name: 'Author(s)',
-					value: authors.join(', ') ?? 'Unknown',
+					value: authors[0] ? authors.join(', ') : 'Unknown',
 					inline: true,
 				},
 				{
@@ -60,6 +60,10 @@ export const createArticleEmbeds = async (
 					value: voteUsers.join('\n'),
 					inline: true,
 				},
+				{
+					name: 'Archive.org Link (Bypasses Paywall)',
+					value: `[Click Here](https://web.archive.org/web/*/${url})`,
+				},
 			],
 			// footer: {
 			//   text:
@@ -71,11 +75,6 @@ export const createArticleEmbeds = async (
 		const { bias, credibility, factualReporting, name, url } = article.mbfcResult;
 		embeds[0].fields.push(
 			...[
-				{
-					name: 'Publisher',
-					value: name,
-					inline: true,
-				},
 				{ name: '\u200B', value: '\u200B' },
 				{
 					name: 'Publisher Bias',
@@ -99,7 +98,13 @@ export const createArticleEmbeds = async (
 				},
 			]
 		);
+		embeds[0].author = {
+			name,
+		};
 	}
 
 	return embeds;
 };
+
+// https://archive.ph/${url}
+// https://archive.org/web/*/${url}

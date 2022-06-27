@@ -16,8 +16,22 @@ import { createArticleEmbeds } from '../helpers/article-formatting';
 import { getByUrl } from 'mbfc-node';
 import { readFile } from 'fs/promises';
 import path from 'path';
+import { MBFCData, Result } from 'mbfc-node/dist/interfaces';
 
 const articleBotChannelName = process.env.NODE_ENV === 'production' ? 'article-bot' : 'article-bot-test';
+
+function getMbfcForUrl(url: string, mbfcData: MBFCData): Result | null {
+	try {
+		const result = getByUrl(url, mbfcData);
+		return result;
+	} catch (error) {
+		if (error instanceof Error && error.message.startsWith('No MBFC entry found')) {
+			return null;
+		} else {
+			throw error;
+		}
+	}
+}
 
 export default (client: Client, instance: WOKCommands) => {
 	client.on('messageCreate', async (message) => {
@@ -45,7 +59,7 @@ export default (client: Client, instance: WOKCommands) => {
 
 		const mbfcData = JSON.parse((await readFile(path.join('cache', 'mbfc-data.json'))).toString());
 
-		const mbfcResult = getByUrl(urlFromPost, mbfcData);
+		const mbfcResult = getMbfcForUrl(urlFromPost, mbfcData);
 
 		// Uncomment to use test data:
 		// const { url, title, description, links, image, author, source, published, ttr, content } = articleParserMockResponse;
@@ -66,7 +80,7 @@ export default (client: Client, instance: WOKCommands) => {
 			submitter: message.author.id,
 			votes: [],
 			submissionMessageId: message.id,
-			mbfcResult: mbfcResult,
+			mbfcResult: mbfcResult ?? undefined,
 		};
 
 		const buttons = new MessageActionRow().addComponents(
