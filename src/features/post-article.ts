@@ -18,7 +18,7 @@ import { readFile } from 'fs/promises';
 import path from 'path';
 import { MBFCData, Result } from 'mbfc-node/dist/interfaces';
 
-const articleBotChannelName = process.env.NODE_ENV === 'production' ? '🤖-article-bot' : 'article-bot-test';
+const articleBotChannelName = process.env.NODE_ENV === 'production' ? 'article-bot-test' : 'article-bot-test';
 
 function getMbfcForUrl(url: string, mbfcData: MBFCData): Result | null {
 	try {
