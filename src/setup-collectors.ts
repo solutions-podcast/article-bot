@@ -38,7 +38,7 @@ const voteCollectorInit = (channel: TextChannel, client: Client) => {
 
 const collectors = [
 	{
-		channelName: process.env.NODE_ENV === 'production' ? 'article-bot' : 'article-bot-test',
+		channelName: process.env.NODE_ENV === 'production' ? '🤖-article-bot' : 'article-bot-test',
 		init: voteCollectorInit,
 		buttons: {
 			// vote
