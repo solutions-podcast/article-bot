@@ -4,7 +4,7 @@ import path from 'path';
 import dotenv from 'dotenv';
 import { setupCollectors } from './setup-collectors';
 import axios from 'axios';
-import { writeFileSync } from 'fs';
+import { mkdirSync, writeFileSync } from 'fs';
 dotenv.config();
 
 function downloadMbfcData() {
@@ -12,6 +12,7 @@ function downloadMbfcData() {
 		if (!res.data || 'version' in res.data === false || 'date' in res.data === false) {
 			console.error('Could not retrieve MBFC data');
 		}
+		mkdirSync('cache');
 		writeFileSync(path.join('cache', 'mbfc-data.json'), JSON.stringify(res.data));
 	});
 }
