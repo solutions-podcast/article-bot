@@ -9,7 +9,7 @@ dotenv.config();
 
 function downloadMbfcData() {
 	axios.get('https://raw.githubusercontent.com/drmikecrowe/mbfcext/main/docs/v3/combined.json').then((res) => {
-		if (!res.data || 'version'! in res.data || 'date'! in res.data) {
+		if (!res.data || 'version' in res.data === false || 'date' in res.data === false) {
 			console.error('Could not retrieve MBFC data');
 		}
 		writeFileSync(path.join('cache', 'mbfc-data.json'), JSON.stringify(res.data));
@@ -31,7 +31,7 @@ client.on('ready', () => {
 		mongoUri: process.env.MONGO_URI,
 	});
 	setupCollectors(client);
-	// downloadMbfcData();
+	downloadMbfcData();
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
