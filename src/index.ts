@@ -1,11 +1,11 @@
 import DiscordJS, { Intents } from 'discord.js';
 import WOKCommands from 'wokcommands';
 import path from 'path';
-import dotenv from 'dotenv';
-import { setupCollectors } from './setup-collectors';
 import axios from 'axios';
 import { mkdirpSync, writeFileSync } from 'fs-extra';
+import dotenv from 'dotenv';
 dotenv.config();
+import { setupCollectors } from './setup-collectors';
 
 function downloadMbfcData() {
 	axios.get('https://raw.githubusercontent.com/drmikecrowe/mbfcext/main/docs/v3/combined.json').then((res) => {
