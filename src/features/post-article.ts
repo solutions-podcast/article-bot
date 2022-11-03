@@ -33,6 +33,7 @@ function getMbfcForUrl(url: string, mbfcData: MBFCData): Result | null {
 	}
 }
 
+const TEST_CHAT_ID = '945053517243113507';
 export default (client: Client, instance: WOKCommands) => {
 	client.on('messageCreate', async (message) => {
 		if (message.author.bot) {
@@ -43,6 +44,9 @@ export default (client: Client, instance: WOKCommands) => {
 			return;
 		}
 
+		if (message.channel.id === TEST_CHAT_ID) {
+			return;
+		}
 		const channel = guild.channels.cache.find((channel) => channel.name === articleBotChannelName) as TextChannel;
 		if (!channel) {
 			return;
